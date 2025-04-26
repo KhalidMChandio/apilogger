@@ -39,7 +39,7 @@ class API_Logger():
         except Exception as ex:
             return ex.args
 
-logger = API_Logger()
+#logger = API_Logger()
 
-logger.Logg_API_Call("hello")
-logger.Read_API_Calls()
+#logger.Logg_API_Call("hello")
+#logger.Read_API_Calls()
