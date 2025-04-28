@@ -3,6 +3,7 @@ import datetime
 from pathlib import Path
 import csv
 
+
 class API_Logger():
     
     def Logg_API_Call(self, key:str = '') -> bool:

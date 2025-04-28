@@ -1,0 +1,113 @@
+import os, sys
+import datetime
+from pathlib import Path
+import csv, sqlite3
+
+DATABASE_NAME = ""
+TABLE_NAME_KEYS = ""
+TABLE_NAME_LOGG = ""
+
+class API_Handler():
+     
+    def __init__(self, database_name: str="", table_name_keys: str="", table_name_logg:str="") -> None:
+        self.DATABASE_NAME = database_name 
+        self.TABLE_NAME_KEYS = table_name_keys
+        self.TABLE_NAME_LOGG = table_name_logg
+        tbl_keys = database_name + "." + table_name_keys
+        tbl_logg = database_name + "." + table_name_logg
+        try:
+            #Create or Connect Database
+            with sqlite3.connect(self.DATABASE_NAME) as conn:
+                print("db created: success")
+                sql = "CREATE TABLE IF NOT EXISTS " + table_name_keys + " (id INTEGER PRIMARY KEY AUTOINCREMENT, api_key text (64) NOT NULL,is_active INT NOT NULL);"
+                cursor = conn.cursor()
+                cursor.execute(sql)
+                conn.commit()
+                print("key table created: success")
+                # interact with database
+                #return conn
+
+        except sqlite3.OperationalError as e:
+            print("Failed to open database:", e)
+        
+    
+    def Logg_API_Call(self, key:str = '') -> bool:
+        """
+        Logg entry into api_calls.csv file and return True on success, False otherwise.
+        """
+        try:
+            with open(Path.joinpath(Path().resolve(),'api_calls.csv'), 'a', newline='') as csvfile:
+                logwriter = csv.writer(csvfile, delimiter='|', quotechar="'", quoting=csv.QUOTE_MINIMAL)
+                dt = datetime.datetime.now()
+                array = []
+                array.append(str(datetime.datetime.now()))
+                array.append(str(dt.strftime("%d"))) #Day
+                array.append(str(dt.strftime("%b"))) #Month
+                array.append(str(dt.year)) #Year
+                array.append(str(dt.strftime("%X"))) #Time
+                array.append(key)
+                print(array)
+                logwriter.writerow(array)
+                return True
+        except Exception as ex:
+            print(ex.args)
+            return False
+    
+    def Read_API_Calls(self):
+        try:
+            with open(Path.joinpath(Path().resolve(),'api_calls.csv'), newline='') as csvfile:
+        
+                loggreader = csv.reader(csvfile, delimiter='|', quotechar="'")
+                return loggreader
+                #for row in spamreader:
+                #    print(row)
+                    #print(', '.join(row))
+        except Exception as ex:
+            return ex.args
+
+
+    def Insert_Key(self, key:str = ""):
+        try:
+            with sqlite3.connect(self.DATABASE_NAME) as conn:
+                sql = "INSERT INTO " + self.TABLE_NAME_KEYS + "(api_key, is_active) VALUES (?,?);"
+                cursor = conn.cursor()
+                args = (key, 0)
+                print (sql, args)
+                cursor.execute(sql, args)
+                conn.commit()
+                print ("Record Added")
+        except Exception as ex:
+            print("error occ:", ex)
+
+
+    def Print_Keys_table (self):
+        try:
+            with sqlite3.connect(self.DATABASE_NAME) as conn:
+                sql = "SELECT * FROM " + self.TABLE_NAME_KEYS
+                cursor = conn.cursor()
+                cursor.execute(sql)
+                recs = cursor.fetchall()
+                print (recs)
+                print ("Records Printed")
+        except Exception as ex:
+            print("error occ:", ex)
+
+    def Drop_Keys_Table(self):
+        try:
+            with sqlite3.connect(self.DATABASE_NAME) as conn:
+                sql = "DROP TABLE IF EXISTS " + self.TABLE_NAME_KEYS
+                cursor = conn.cursor()
+                cursor.execute(sql)
+                conn.commit()
+                print("dropped table")
+        except Exception as ex:
+            print("error occ:", ex)
+
+
+apih = API_Handler(database_name="passpic_api.db",table_name_keys="tbl_keys", table_name_logg="tbl_log")
+apih.Insert_Key("this is key");
+apih.Print_Keys_table()
+#apih.Drop_Keys_Table()
+
+
+
