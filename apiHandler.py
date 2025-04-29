@@ -19,11 +19,17 @@ class API_Handler():
             #Create or Connect Database
             with sqlite3.connect(self.DATABASE_NAME) as conn:
                 print("db created: success")
-                sql = "CREATE TABLE IF NOT EXISTS " + table_name_keys + " (id INTEGER PRIMARY KEY AUTOINCREMENT, api_key text (64) NOT NULL,is_active INT NOT NULL);"
+                sql = "CREATE TABLE IF NOT EXISTS " + table_name_keys + " (id INTEGER PRIMARY KEY AUTOINCREMENT, user_name text (64) NOT NULL, api_key text (64) NOT NULL,is_active INT NOT NULL, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP);"
                 cursor = conn.cursor()
                 cursor.execute(sql)
-                conn.commit()
                 print("key table created: success")
+                sql = "CREATE TABLE IF NOT EXISTS " + table_name_logg + " (id INTEGER PRIMARY KEY AUTOINCREMENT, api_key text (64) NOT NULL, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)"
+                cursor = conn.cursor()
+                cursor.execute(sql)
+                print("logg table created: success")
+                conn.commit()
+
+                
                 # interact with database
                 #return conn
 
@@ -66,19 +72,31 @@ class API_Handler():
             return ex.args
 
 
-    def Insert_Key(self, key:str = ""):
+    def Insert_Logg(self, key:str = ""):
         try:
             with sqlite3.connect(self.DATABASE_NAME) as conn:
-                sql = "INSERT INTO " + self.TABLE_NAME_KEYS + "(api_key, is_active) VALUES (?,?);"
+                sql = "INSERT INTO " + self.TABLE_NAME_LOGG + "(api_key) VALUES (?);"
                 cursor = conn.cursor()
-                args = (key, 0)
+                args = (key,)
                 print (sql, args)
                 cursor.execute(sql, args)
                 conn.commit()
-                print ("Record Added")
+                print ("Record Added into Logg table")
         except Exception as ex:
             print("error occ:", ex)
 
+    def Insert_Key(self, user_name:str="", key:str = ""):
+        try:
+            with sqlite3.connect(self.DATABASE_NAME) as conn:
+                sql = "INSERT INTO " + self.TABLE_NAME_KEYS + "(api_key, user_name, is_active) VALUES (?,?,?);"
+                cursor = conn.cursor()
+                args = (key, user_name, 1,)
+                print (sql, args)
+                cursor.execute(sql, args)
+                conn.commit()
+                print ("Record Added into Keys table")
+        except Exception as ex:
+            print("error occ:", ex)
 
     def Print_Keys_table (self):
         try:
@@ -88,7 +106,19 @@ class API_Handler():
                 cursor.execute(sql)
                 recs = cursor.fetchall()
                 print (recs)
-                print ("Records Printed")
+                print ("Records Printed Keys Table")
+        except Exception as ex:
+            print("error occ:", ex)
+
+    def Print_Logg_table (self):
+        try:
+            with sqlite3.connect(self.DATABASE_NAME) as conn:
+                sql = "SELECT * FROM " + self.TABLE_NAME_LOGG
+                cursor = conn.cursor()
+                cursor.execute(sql)
+                recs = cursor.fetchall()
+                print (recs)
+                print ("Records Printed Logg Table")
         except Exception as ex:
             print("error occ:", ex)
 
@@ -105,8 +135,10 @@ class API_Handler():
 
 
 apih = API_Handler(database_name="passpic_api.db",table_name_keys="tbl_keys", table_name_logg="tbl_log")
-apih.Insert_Key("this is key");
+apih.Insert_Key("Khalid Chandio", "this is key");
+apih.Insert_Logg("keykeykeykey")
 apih.Print_Keys_table()
+apih.Print_Logg_table()
 #apih.Drop_Keys_Table()
 
 
