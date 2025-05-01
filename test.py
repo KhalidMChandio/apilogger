@@ -1,5 +1,8 @@
-from .apilogger import API_Logger
+from .apiHandler import API_Handler
 
-logger = apilogger.API_Logger()
+apih = API_Handler(database_name="passpic_api.db",table_name_keys="tbl_keys", table_name_logg="tbl_log")
 
-logger.Logg_API_Call("hello")
+from tkinter import Tk
+
+if __name__ == "__main__":
+    application.run()

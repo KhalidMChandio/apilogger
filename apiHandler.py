@@ -82,8 +82,10 @@ class API_Handler():
                 cursor.execute(sql, args)
                 conn.commit()
                 print ("Record Added into Logg table")
+                return True
         except Exception as ex:
             print("error occ:", ex)
+            return False
 
     def Insert_Key(self, user_name:str="", key:str = ""):
         try:
@@ -95,8 +97,68 @@ class API_Handler():
                 cursor.execute(sql, args)
                 conn.commit()
                 print ("Record Added into Keys table")
+                return True
         except Exception as ex:
             print("error occ:", ex)
+            return False
+
+    def Delete_Key(self, key:str = ""):
+        try:
+            with sqlite3.connect(self.DATABASE_NAME) as conn:
+                sql = "DELETE FROM " + self.TABLE_NAME_KEYS + " WHERE api_key=?;"
+                cursor = conn.cursor()
+                args = (key,)
+                print (sql, args)
+                cursor.execute(sql, args)
+                conn.commit()
+                print ("Record deleted from Keys table")
+                return True
+        except Exception as ex:
+            print("error occ:", ex)
+            return False
+
+    def Activate_Key(self, key:str = ""):
+        try:
+            with sqlite3.connect(self.DATABASE_NAME) as conn:
+                sql = "UPDATE " + self.TABLE_NAME_KEYS + " SET is_active = 1 WHERE api_key=?;"
+                cursor = conn.cursor()
+                args = (key,)
+                print (sql, args)
+                cursor.execute(sql, args)
+                conn.commit()
+                print ("Record deleted from Keys table")
+                return True
+        except Exception as ex:
+            print("error occ:", ex)
+            return False
+
+    def Deactivate_Key(self, key:str = ""):
+        try:
+            with sqlite3.connect(self.DATABASE_NAME) as conn:
+                sql = "UPDATE " + self.TABLE_NAME_KEYS + " SET is_active = 0 WHERE api_key=?;"
+                cursor = conn.cursor()
+                args = (key,)
+                print (sql, args)
+                cursor.execute(sql, args)
+                conn.commit()
+                print ("Record deleted from Keys table")
+                return True
+        except Exception as ex:
+            print("error occ:", ex)
+            return False
+
+    def List_Keys_table (self):
+        try:
+            with sqlite3.connect(self.DATABASE_NAME) as conn:
+                sql = "SELECT * FROM " + self.TABLE_NAME_KEYS
+                cursor = conn.cursor()
+                cursor.execute(sql)
+                recs = cursor.fetchall()
+                return recs
+        except Exception as ex:
+            print("error occ:", ex)
+            return None
+
 
     def Print_Keys_table (self):
         try:
@@ -130,15 +192,36 @@ class API_Handler():
                 cursor.execute(sql)
                 conn.commit()
                 print("dropped table")
+                return True
+        except Exception as ex:
+            print("error occ:", ex)
+            return False
+
+    def Key_Exists(self, key: str=""):
+        try:
+            with sqlite3.connect(self.DATABASE_NAME) as conn:
+                sql = "SELECT * FROM " + self.TABLE_NAME_KEYS + " WHERE api_key=? AND is_active=1"
+                cursor = conn.cursor()
+                args = (key,)
+                print (sql, args)
+                recs = cursor.execute(sql, args)
+                if recs:
+                    print ("Record found.")
+                    return True
+                else:
+                    print ("Record NOT found.")
+                    return False
         except Exception as ex:
             print("error occ:", ex)
 
-
-apih = API_Handler(database_name="passpic_api.db",table_name_keys="tbl_keys", table_name_logg="tbl_log")
-apih.Insert_Key("Khalid Chandio", "this is key");
-apih.Insert_Logg("keykeykeykey")
-apih.Print_Keys_table()
-apih.Print_Logg_table()
+#apih = API_Handler(database_name="passpic_api.db",table_name_keys="tbl_keys", table_name_logg="tbl_log")
+#apih.Insert_Key("Khalid Chandio2", "keykeykeykey_2");
+#apih.Insert_Logg("keykeykeykey_2")
+#apih.Delete_Key("keykeykeykey_2")
+#apih.Activate_Key("keykeykeykey_2")
+#apih.Deactivate_Key("keykeykeykey_2")
+#apih.Print_Keys_table()
+#apih.Print_Logg_table()
 #apih.Drop_Keys_Table()
 
 
