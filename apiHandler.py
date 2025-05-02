@@ -28,49 +28,13 @@ class API_Handler():
                 cursor.execute(sql)
                 print("logg table created: success")
                 conn.commit()
-
-                
-                # interact with database
-                #return conn
+                return None
 
         except sqlite3.OperationalError as e:
             print("Failed to open database:", e)
+            return None
         
-    
-    def Logg_API_Call(self, key:str = '') -> bool:
-        """
-        Logg entry into api_calls.csv file and return True on success, False otherwise.
-        """
-        try:
-            with open(Path.joinpath(Path().resolve(),'api_calls.csv'), 'a', newline='') as csvfile:
-                logwriter = csv.writer(csvfile, delimiter='|', quotechar="'", quoting=csv.QUOTE_MINIMAL)
-                dt = datetime.datetime.now()
-                array = []
-                array.append(str(datetime.datetime.now()))
-                array.append(str(dt.strftime("%d"))) #Day
-                array.append(str(dt.strftime("%b"))) #Month
-                array.append(str(dt.year)) #Year
-                array.append(str(dt.strftime("%X"))) #Time
-                array.append(key)
-                print(array)
-                logwriter.writerow(array)
-                return True
-        except Exception as ex:
-            print(ex.args)
-            return False
-    
-    def Read_API_Calls(self):
-        try:
-            with open(Path.joinpath(Path().resolve(),'api_calls.csv'), newline='') as csvfile:
-        
-                loggreader = csv.reader(csvfile, delimiter='|', quotechar="'")
-                return loggreader
-                #for row in spamreader:
-                #    print(row)
-                    #print(', '.join(row))
-        except Exception as ex:
-            return ex.args
-
+       
 
     def Insert_Logg(self, key:str = ""):
         try:
@@ -78,7 +42,6 @@ class API_Handler():
                 sql = "INSERT INTO " + self.TABLE_NAME_LOGG + "(api_key) VALUES (?);"
                 cursor = conn.cursor()
                 args = (key,)
-                print (sql, args)
                 cursor.execute(sql, args)
                 conn.commit()
                 print ("Record Added into Logg table")
@@ -93,7 +56,6 @@ class API_Handler():
                 sql = "INSERT INTO " + self.TABLE_NAME_KEYS + "(api_key, user_name, is_active) VALUES (?,?,?);"
                 cursor = conn.cursor()
                 args = (key, user_name, 1,)
-                print (sql, args)
                 cursor.execute(sql, args)
                 conn.commit()
                 print ("Record Added into Keys table")
@@ -108,7 +70,6 @@ class API_Handler():
                 sql = "DELETE FROM " + self.TABLE_NAME_KEYS + " WHERE api_key=?;"
                 cursor = conn.cursor()
                 args = (key,)
-                print (sql, args)
                 cursor.execute(sql, args)
                 conn.commit()
                 print ("Record deleted from Keys table")
@@ -123,7 +84,6 @@ class API_Handler():
                 sql = "UPDATE " + self.TABLE_NAME_KEYS + " SET is_active = 1 WHERE api_key=?;"
                 cursor = conn.cursor()
                 args = (key,)
-                print (sql, args)
                 cursor.execute(sql, args)
                 conn.commit()
                 print ("Record deleted from Keys table")
@@ -138,7 +98,6 @@ class API_Handler():
                 sql = "UPDATE " + self.TABLE_NAME_KEYS + " SET is_active = 0 WHERE api_key=?;"
                 cursor = conn.cursor()
                 args = (key,)
-                print (sql, args)
                 cursor.execute(sql, args)
                 conn.commit()
                 print ("Record deleted from Keys table")
@@ -167,7 +126,6 @@ class API_Handler():
                 cursor = conn.cursor()
                 cursor.execute(sql)
                 recs = cursor.fetchall()
-                print (recs)
                 print ("Records Printed Keys Table")
         except Exception as ex:
             print("error occ:", ex)
@@ -179,7 +137,6 @@ class API_Handler():
                 cursor = conn.cursor()
                 cursor.execute(sql)
                 recs = cursor.fetchall()
-                print (recs)
                 print ("Records Printed Logg Table")
         except Exception as ex:
             print("error occ:", ex)
@@ -203,9 +160,11 @@ class API_Handler():
                 sql = "SELECT * FROM " + self.TABLE_NAME_KEYS + " WHERE api_key=? AND is_active=1"
                 cursor = conn.cursor()
                 args = (key,)
-                print (sql, args)
-                recs = cursor.execute(sql, args)
+                cursor.execute(sql, args)
+                recs = cursor.fetchall()
+                
                 if recs:
+                #    for rec in recs:
                     print ("Record found.")
                     return True
                 else:
@@ -213,6 +172,7 @@ class API_Handler():
                     return False
         except Exception as ex:
             print("error occ:", ex)
+            return False
 
 #apih = API_Handler(database_name="passpic_api.db",table_name_keys="tbl_keys", table_name_logg="tbl_log")
 #apih.Insert_Key("Khalid Chandio2", "keykeykeykey_2");
